@@ -14,8 +14,6 @@ def whats_new(session):
     whats_new_url = urljoin(MAIN_DOC_URL, 'whatsnew/')
     response = session.get(whats_new_url)
     response = get_response(session, whats_new_url)
-    if response is None:
-        return
     soup = BeautifulSoup(response.text, features='lxml')
     main_div = find_tag(soup, 'section', attrs={'id': 'what-s-new-in-python'})
     div_with_ul = find_tag(
@@ -51,8 +49,6 @@ def latest_versions(session):
     response = session.get(MAIN_DOC_URL)
     response.encoding = 'utf-8'
     response = get_response(session, MAIN_DOC_URL)
-    if response is None:
-        return
     soup = BeautifulSoup(response.text, features='lxml')
     sidebar = find_tag(soup, 'div', attrs={'class': 'sphinxsidebarwrapper'})
     ul_tags = sidebar.find_all('ul')
@@ -61,16 +57,13 @@ def latest_versions(session):
             a_tags = ul.find_all('a')
             break
         else:
-            raise Exception('Не найден список c версиями Python')
+            raise AttributeError('Не найден список c версиями Python')
     results = [('Ссылка на документацию', 'Версия', 'Статус')]
     pattern = r'Python (?P<version>\d\.\d+) \((?P<status>.*)\)'
     for a_tag in a_tags:
         link = a_tag['href']
         text_match = re.search(pattern, a_tag.text)
-        if text_match is not None:
-            version, status = text_match.groups()
-        else:
-            version, status = a_tag.text, ''
+        version, status = text_match.groups() if text_match else a_tag.text, ''
         results.append(
             (link, version, status)
         )
@@ -82,8 +75,6 @@ def download(session):
     response = session.get(downloads_url)
     response.encoding = 'utf-8'
     response = get_response(session, downloads_url)
-    if response is None:
-        return
     soup = BeautifulSoup(response.text, features='lxml')
     main_tag = find_tag(soup, 'div', {'role': 'main'})
     table_tag = find_tag(main_tag, 'table', {'class': 'docutils'})
@@ -128,8 +119,6 @@ def pep(session):
         response = session.get(status_link)
         response.encoding = 'utf-8'
         response = get_response(session, status_link)
-        if response is None:
-            continue
         soup = BeautifulSoup(response.text, features='lxml')
         status_pep = soup.find(
             string='Status'

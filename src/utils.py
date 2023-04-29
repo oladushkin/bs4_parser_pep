@@ -15,6 +15,11 @@ def get_response(session, url):
             f'Возникла ошибка при загрузке страницы {url}',
             stack_info=True
         )
+    except ConnectionError:
+        logging.exception(
+            f'Возникла ошибка соединения {url}',
+            stack_info=True
+        )
 
 
 def find_tag(soup, tag, attrs=None):
